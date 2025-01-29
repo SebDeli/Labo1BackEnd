@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: Clone du backend
-          command: git clone [https://github.com/SebDeli/Labo1BackEnd] backend
+          command: git clone https://github.com/SebDeli/Labo1BackEnd backend
       - run:
           name: Installation des dépendances backend
           command: |
@@ -30,10 +30,10 @@ jobs:
       - checkout
       - run:
           name: Clone du backend
-          command: git clone [https://github.com/SebDeli/Labo1BackEnd] backend
+          command: git clone https://github.com/SebDeli/Labo1BackEnd backend
       - run:
           name: Clone du frontend
-          command: git clone [https://github.com/SebDeli/Labo1FrontEnd] frontend
+          command: git clone https://github.com/SebDeli/Labo1FrontEnd frontend
       - run:
           name: Installation des dépendances frontend
           command: |
