@@ -1,38 +1,77 @@
-# This config was automatically generated from your source code
-# Stacks detected: deps:node:.,test:jest:
 version: 2.1
+
 orbs:
   node: circleci/node@5
+
 jobs:
-  test-node:
-    # Install node dependencies and run tests
+  checkoutEtTests:
     executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: npm
       - run:
-          command: npm install jest-junit
+          name: Clone du backend
+          command: git clone [https://github.com/SebDeli/Labo1BackEnd] backend
       - run:
-          name: Run tests
-          command: npm run test --ci --runInBand --reporters=default --reporters=jest-junit
+          name: Installation des dépendances backend
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Exécution des tests
+          command: |
+            cd backend
+            npm run test
       - store_test_results:
-          path: ./test-results/
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
+          path: backend/test-results/
+
+  integrationFrontend:
+    executor: node/default
+    steps:
+      - checkout
+      - run:
+          name: Clone du backend
+          command: git clone [https://github.com/SebDeli/Labo1BackEnd] backend
+      - run:
+          name: Clone du frontend
+          command: git clone [https://github.com/SebDeli/Labo1FrontEnd] frontend
+      - run:
+          name: Installation des dépendances frontend
+          command: |
+            cd frontend
+            npm install
+      - run:
+          name: Build du frontend
+          command: |
+            cd frontend
+            npm run build
+      - run:
+          name: Préparation du backend pour le déploiement
+          command: |
+            cd backend
+            mkdir -p public
+            cp -r ../frontend/build/* public/
+      - persist_to_workspace:
+          root: backend
+          paths:
+            - public
+
+  deploiement:
     docker:
       - image: cimg/base:stable
     steps:
-      # Replace this with steps to deploy to users
+      - attach_workspace:
+          at: /workspace
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Vérification du contenu du backend
+          command: ls -Rl /workspace
+
 workflows:
-  build-and-test:
+  build-and-deploy:
     jobs:
-      - test-node
-    # - deploy:
-    #     requires:
-    #       - test-node
+      - checkoutEtTests
+      - integrationFrontend:
+          requires:
+            - checkoutEtTests
+      - deploiement:
+          requires:
+            - integrationFrontend
